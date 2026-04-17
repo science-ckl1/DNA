@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA Data Detective | DNA 偵探</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { color: #2c3e50; text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #2980b9; margin-top: 0; }
+        .mission-box { background: #ebf5fb; border-left: 6px solid #3498db; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; background: #fff; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: center; }
+        th { background-color: #3498db; color: white; }
+        input[type="text"], input[type="number"] { padding: 8px; border: 1px solid #ced4da; border-radius: 4px; width: 80px; text-align: center; }
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .btn { background: #2ecc71; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.3s; }
+        .btn:hover { background: #27ae60; }
+        .feedback { margin-top: 20px; padding: 15px; border-radius: 6px; font-weight: bold; display: none; }
+        .correct { background-color: #d4edda; color: #155724; display: block; }
+        .wrong { background-color: #f8d7da; color: #721c24; display: block; }
+        .lang-en { color: #7f8c8d; font-size: 0.9em; font-style: italic; display: block; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🧬 DNA Data Detective <br> DNA 偵探</h1>
+    
+    <div id="step1" class="step active">
+        <h2>(A) DNA 的結構 <span class="lang-en">(A) Structure of DNA</span></h2>
+        <div class="mission-box">
+            <br>請你化身數據偵探，找出隱藏在這些數字背後的「配對規律」。
+            <span class="lang-en">Please become a data detective and find the "pairing rules" hidden behind these numbers.</span>
+        </div>
+
+        <p>觀察下表關於不同物種 DNA 鹼基組成的百分比：
+        <span class="lang-en">Observe the following table regarding the percentage of DNA base composition in different species:</span></p>
+        
+        <table>
+            <tr>
+                <th>物種 Species</th>
+                <th>A (%)</th>
+                <th>T (%)</th>
+                <th>G (%)</th>
+                <th>C (%)</th>
+            </tr>
+            <tr><td>人類 Human</td><td>30.9</td><td>29.4</td><td>19.9</td><td>19.8</td></tr>
+            <tr><td>小麥 Wheat</td><td>27.3</td><td>27.1</td><td>22.7</td><td>22.8</td></tr>
+            <tr><td>大腸桿菌 E. coli</td><td>24.7</td><td>23.6</td><td>26.0</td><td>25.7</td></tr>
+        </table>
+
+        <p>在同一個物種中，哪兩個鹼基的百分比最為接近？
+        <span class="lang-en">In the same species, which two bases have the most similar percentages?</span></p>
+        
+        <p>第一組 Group 1: <input type="text" id="p1a"> 與 and <input type="text" id="p1b"></p>
+        <p>第二組 Group 2: <input type="text" id="p2a"> 與 and <input type="text" id="p2b"></p>
+        
+        <button class="btn" onclick="checkStep1()">檢查線索 Check Clues</button>
+        <div id="f1" class="feedback"></div>
+    </div>
+
+    <div id="step2" class="step">
+        <h2>數據運算 Data Calculation</h2>
+        <p>完成以下計算（保留至小數點後 1 位）：
+        <span class="lang-en">Complete the following calculations (keep to 1 decimal place):</span></p>
+        
+        <table>
+            <tr>
+                <th>物種 Species</th>
+                <th>A/T</th>
+                <th>G/C</th>
+            </tr>
+            <tr><td>人類 Human</td><td>1.0</td><td><input type="number" id="c1" step="0.1"></td></tr>
+            <tr><td>小麥 Wheat</td><td><input type="number" id="c2" step="0.1"></td><td><input type="number" id="c3" step="0.1"></td></tr>
+            <tr><td>大腸桿菌 E. coli</td><td><input type="number" id="c4" step="0.1"></td><td><input type="number" id="c5" step="0.1"></td></tr>
+        </table>
+
+        <button class="btn" onclick="checkStep2()">提交數據 Submit Data</button>
+        <div id="f2" class="feedback"></div>
+    </div>
+
+    <div id="step3" class="step">
+        <h2>建立假說 Forming a Hypothesis</h2>
+        <div class="mission-box">
+            若 DNA 是一條由兩股鏈結合而成的長鏈，根據數據，你會如何假設鹼基之間的「配對關係」？
+            <span class="lang-en">If DNA is a long chain formed by the combination of two strands, how would you hypothesize the "pairing relationship" between bases based on the data?</span>
+        </div>
+
+        <p>1. 因為 A 的數量大約等於 <input type="text" id="res1" style="width:40px"> 的數量，所以 A 應該與 <input type="text" id="res2" style="width:40px"> 配對。
+        <span class="lang-en">Because the amount of A is approximately equal to the amount of ____, A should pair with ____.</span></p>
+        
+        <p>2. 因為 G 的數量大約等於 <input type="text" id="res3" style="width:40px"> 的數量，所以 G 應該與 <input type="text" id="res4" style="width:40px"> 配對。
+        <span class="lang-en">Because the amount of G is approximately equal to the amount of ____, G should pair with ____.</span></p>
+
+        <button class="btn" onclick="checkStep3()">發表結論 Publish Conclusion</button>
+        <div id="f3" class="feedback"></div>
+    </div>
+
+    <div id="final" class="step">
+        <h2 style="color: #27ae60;">🎉 恭喜你！ Excellent, Data Detective!</h2>
+        <p>觀察各物種的 A/T 與 G/C 比值，你會發現它們都非常接近 1。
+        <span class="lang-en">You have successfully discovered Chargaff's Rules! Observing the A/T and G/C ratios of each species, you will find they are all very close to 1.</span></p>
+        <button class="btn" onclick="location.reload()">重新開始 Restart</button>
+    </div>
+</div>
+
+<script>
+    function checkStep1() {
+        const p1 = [document.getElementById('p1a').value.toUpperCase(), document.getElementById('p1b').value.toUpperCase()];
+        const p2 = [document.getElementById('p2a').value.toUpperCase(), document.getElementById('p2b').value.toUpperCase()];
+        const isAT = p1.includes('A') && p1.includes('T');
+        const isGC = p2.includes('G') && p2.includes('C');
+        const isAT2 = p2.includes('A') && p2.includes('T');
+        const isGC2 = p1.includes('G') && p1.includes('C');
+
+        if ((isAT && isGC) || (isAT2 && isGC2)) {
+            showFeedback('f1', '正確！你發現了鹼基之間的聯繫。 Correct! You found the link between bases.', 'correct');
+            setTimeout(() => { nextStep(1, 2); }, 2000);
+        } else {
+            showFeedback('f1', '再觀察一下數據，哪些數字最接近？ Look closer at the data, which numbers are most similar?', 'wrong');
+        }
+    }
+
+    function checkStep2() {
+        const vals = ['c1', 'c2', 'c3', 'c4', 'c5'].map(id => parseFloat(document.getElementById(id).value));
+        if (vals.every(v => v >= 0.9 && v <= 1.1)) {
+            showFeedback('f2', '計算精確！比值都接近 1。 Precise calculation! All ratios are close to 1.', 'correct');
+            setTimeout(() => { nextStep(2, 3); }, 2000);
+        } else {
+            showFeedback('f2', '請重新計算，記得保留至小數點後 1 位。 Please recalculate, remember to keep 1 decimal place.', 'wrong');
+        }
+    }
+
+    function checkStep3() {
+        const r1 = document.getElementById('res1').value.toUpperCase();
+        const r2 = document.getElementById('res2').value.toUpperCase();
+        const r3 = document.getElementById('res3').value.toUpperCase();
+        const r4 = document.getElementById('res4').value.toUpperCase();
+
+        if (r1 === 'T' && r2 === 'T' && r3 === 'C' && r4 === 'C') {
+            showFeedback('f3', '完美的科學假說！ Perfect scientific hypothesis!', 'correct');
+            setTimeout(() => { nextStep(3, 'final'); }, 2000);
+        } else {
+            showFeedback('f3', '根據你的計算結果再試一次。 Try again based on your calculation results.', 'wrong');
+        }
+    }
+
+    function nextStep(curr, next) {
+        document.getElementById('step' + curr).classList.remove('active');
+        document.getElementById(next === 'final' ? 'final' : 'step' + next).classList.add('active');
+    }
+
+    function showFeedback(id, msg, type) {
+        const el = document.getElementById(id);
+        el.innerText = msg;
+        el.className = 'feedback ' + type;
+    }
+</script>
+
+</body>
+</html>
