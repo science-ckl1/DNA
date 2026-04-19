@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>DNA解碼實驗室</title>
+    <style>
+        body { font-family: 'Segoe UI', Microsoft JhengHei, sans-serif; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .lab-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; gap: 40px; border-top: 8px solid #f39c12; max-width: 900px; }
+        .visual-panel { text-align: center; }
+        canvas { background: #fff; border-radius: 15px; border: 3px solid #d1d9e6; width: 320px; height: 380px; }
+        .control-panel { width: 380px; }
+        .selection-box { background: #f8fbff; padding: 20px; border-radius: 12px; border: 1px solid #e1e8f0; margin-bottom: 20px; }
+        .gene-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        select { padding: 8px; font-family: monospace; font-size: 1.1em; border-radius: 5px; border: 2px solid #3498db; width: 120px; }
+        .btn-reveal { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2em; font-weight: bold; transition: 0.3s; }
+        .btn-reveal:hover { background: #219150; transform: translateY(-2px); }
+        .btn-reveal:disabled { background: #bdc3c7; cursor: not-allowed; transform: none; }
+        #phenotypeResult { margin-top: 20px; padding: 15px; background: #fffde7; border-radius: 10px; border: 1px solid #fff59d; display: none; }
+        .result-item { margin: 5px 0; font-size: 1.1em; }
+        .label-tag { font-weight: bold; color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+<h1>🧬 DNA解碼實驗室 (DNA decoding game) </h1>
+<p>請為每個特徵選擇一組 DNA密碼，然後觀察動物的樣子。</p>
+
+<div class="lab-container">
+    <div class="visual-panel">
+        <canvas id="catCanvas" width="320" height="380"></canvas>
+        <div id="genotypeDisplay" style="margin-top:15px; font-family:monospace; color:#7f8c8d;">基因: ??? - ??? - ???</div>
+    </div>
+
+    <div class="control-panel">
+        <div class="selection-box">
+            <div class="gene-row">
+                <span class="label-tag">毛色基因：</span>
+                <select id="hairGene" onchange="checkReady()">
+                    <option value="">-- 選擇 --</option>
+                    <option value="ATC">ATC</option>
+                    <option value="TTA">TTA</option>
+                    <option value="CGA">CGA</option>
+                </select>
+            </div>
+            <div class="gene-row">
+                <span class="label-tag">眼睛顏色基因：</span>
+                <select id="eyeGene" onchange="checkReady()">
+                    <option value="">-- 選擇 --</option>
+                    <option value="GGC">GGC</option>
+                    <option value="CCG">CCG</option>
+                    <option value="AAT">AAT</option>
+                </select>
+            </div>
+            <div class="gene-row">
+                <span class="label-tag">嘴形基因：</span>
+                <select id="mouthGene" onchange="checkReady()">
+                    <option value="">-- 選擇 --</option>
+                    <option value="TAT">TAT</option>
+                    <option value="GCG">GCG</option>
+                    <option value="TTC">TTC</option>
+                </select>
+            </div>
+            <button id="revealBtn" class="btn-reveal" disabled onclick="revealCat()">解碼 (Decode)</button>
+        </div>
+
+        <div id="phenotypeResult">
+            <h3 style="margin-top:0; color:#f39c12;">解碼報告 </h3>
+            <div class="result-item">🔸 毛色：<span id="resHair"></span></div>
+            <div class="result-item">🔸 眼睛顏色：<span id="resEye"></span></div>
+            <div class="result-item">🔸 嘴形：<span id="resMouth"></span></div>
+            <button onclick="location.reload()" style="margin-top:10px; background:none; border:none; color:#3498db; cursor:pointer; text-decoration:underline;">重新實驗</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('catCanvas');
+    const ctx = canvas.getContext('2d');
+    const revealBtn = document.getElementById('revealBtn');
+
+    // 基因數據庫
+    const traitMap = {
+        ATC: { type: 'hair', desc: '黑色毛皮', color: '#2d3436' },
+        TTA: { type: 'hair', desc: '橘色毛皮', color: '#e67e22' },
+        CGA: { type: 'hair', desc: '灰色毛皮', color: '#b2bec3' },
+        GGC: { type: 'eye', desc: '棕色眼睛', color: '#8b4513' },
+        CCG: { type: 'eye', desc: '藍色眼睛', color: '#3498db' },
+        AAT: { type: 'eye', desc: '綠色眼睛', color: '#2ecc71' },
+        TAT: { type: 'mouth', desc: '開心的笑容', shape: 'happy' },
+        GCG: { type: 'mouth', desc: '驚訝的圓嘴', shape: 'surprise' },
+        TTC: { type: 'mouth', desc: '嚴肅的表情', shape: 'serious' }
+    };
+
+    function checkReady() {
+        const h = document.getElementById('hairGene').value;
+        const e = document.getElementById('eyeGene').value;
+        const m = document.getElementById('mouthGene').value;
+        revealBtn.disabled = !(h && e && m);
+    }
+
+    function revealCat() {
+        const h = document.getElementById('hairGene').value;
+        const e = document.getElementById('eyeGene').value;
+        const m = document.getElementById('mouthGene').value;
+
+        // 顯示結果文字
+        document.getElementById('resHair').innerText = traitMap[h].desc;
+        document.getElementById('resEye').innerText = traitMap[e].desc;
+        document.getElementById('resMouth').innerText = traitMap[m].desc;
+        document.getElementById('phenotypeResult').style.display = 'block';
+        document.getElementById('genotypeDisplay').innerText = `DNA密碼: ${h} - ${e} - ${m}`;
+        document.getElementById('genotypeDisplay').style.color = "#2c3e50";
+
+        drawCat(h, e, m);
+    }
+
+    function drawCat(hCode, eCode, mCode) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const fur = traitMap[hCode].color;
+        const eye = traitMap[eCode].color;
+        const mouthType = traitMap[mCode].shape;
+
+        // 1. 繪製耳朵與頭部
+        ctx.fillStyle = fur;
+        // 左耳
+        ctx.beginPath(); ctx.moveTo(80, 150); ctx.lineTo(70, 80); ctx.lineTo(120, 130); ctx.fill();
+        // 右耳
+        ctx.beginPath(); ctx.moveTo(240, 150); ctx.lineTo(250, 80); ctx.lineTo(200, 130); ctx.fill();
+        // 頭
+        ctx.beginPath(); ctx.arc(160, 200, 90, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#2c3e50"; ctx.lineWidth = 2; ctx.stroke();
+
+        // 2. 眼睛
+        [115, 205].forEach(x => {
+            ctx.fillStyle = "white"; ctx.beginPath(); ctx.ellipse(x, 195, 18, 12, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = eye; ctx.beginPath(); ctx.ellipse(x, 195, 8, 10, 0, 0, Math.PI*2); ctx.fill();
+        });
+
+        // 3. 鼻子
+        ctx.fillStyle = (hCode === "ATC") ? "white" : "black";
+        ctx.beginPath(); ctx.moveTo(160, 220); ctx.lineTo(150, 210); ctx.lineTo(170, 210); ctx.fill();
+
+        // 4. 嘴巴
+        ctx.strokeStyle = "black"; ctx.lineWidth = 2; ctx.beginPath();
+        if (mouthType === "happy") ctx.arc(160, 235, 15, 0.1*Math.PI, 0.9*Math.PI);
+        else if (mouthType === "surprise") ctx.arc(160, 245, 10, 0, Math.PI*2);
+        else if (mouthType === "serious") { ctx.moveTo(140, 245); ctx.lineTo(180, 245); }
+        ctx.stroke();
+
+        // 5. 鬍鬚
+        ctx.lineWidth = 1;
+        [215, 225, 235].forEach(y => {
+            ctx.beginPath(); ctx.moveTo(150, y); ctx.lineTo(110, y-10); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(170, y); ctx.lineTo(210, y-10); ctx.stroke();
+        });
+    }
+
+    // 初始剪影
+    function init() {
+        ctx.fillStyle = "#dfe6e9";
+        ctx.beginPath(); ctx.arc(160, 200, 90, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#b2bec3"; ctx.font = "bold 50px Arial"; ctx.textAlign = "center";
+        ctx.fillText("?", 160, 220);
+    }
+    init();
+</script>
+
+</body>
+</html>
